@@ -1,0 +1,8 @@
+version: 1.0.0
+
+seed: "observe drum fault concert analyst old short plunge loan essence symbol invite"
+
+bind:
+  host: 127.0.0.1
+  port: 2322
+
