@@ -26,6 +26,26 @@ func (c *HttpConn) Close() error {
 	return nil
 }
 
+type Utxo struct {
+	Hash     string
+	Index    int
+	Sequence string
+	Amount   string
+}
+
+type Transaction struct {
+	UtxoList      []Utxo
+	ToAddress     string
+	ChangeAddress string
+	ByteFee       int
+	Amount        string
+}
+
+type SignTransactionPayload struct {
+	Gate string      `json:"gate"`
+	Tx   Transaction `json:"tx"`
+}
+
 type Test struct{}
 
 type HelloArgs struct {
@@ -60,6 +80,18 @@ func main() {
 
 	err = http.Serve(listener, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/rpc" {
+			serverCodec := jsonrpc2.NewServerCodec(&HttpConn{in: r.Body, out: w}, server)
+
+			w.Header().Set("Content-type", "application/json")
+			w.WriteHeader(200)
+
+			if err1 := server.ServeRequest(serverCodec); err1 != nil {
+				http.Error(w, "Error while serving JSON request", 500)
+				return
+			}
+		}
+
+		if r.URL.Path == "/api/v1/sign_transaction" {
 			serverCodec := jsonrpc2.NewServerCodec(&HttpConn{in: r.Body, out: w}, server)
 
 			w.Header().Set("Content-type", "application/json")
